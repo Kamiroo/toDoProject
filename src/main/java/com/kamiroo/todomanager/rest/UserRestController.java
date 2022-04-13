@@ -22,13 +22,18 @@ public class UserRestController {
     private UserService userService;
 
     @PostMapping("/addUser")
-    public boolean addUser(UserEntity userEntity) {
-        return userService.addUser(userEntity);
+    public UserEntity addUser(@RequestBody UserEntity userEntity) {
+        return userRepository.save(userEntity);
     }
 
     @GetMapping("/getUser")
     public List<UserEntity> getUser(String firstName) {
         return userRepository.findByFirstName(firstName);
+    }
+
+    @GetMapping("/getAllUsers")
+    public List<UserEntity> getAllUsers() {
+        return userRepository.findAllUsers();
     }
 
 }
