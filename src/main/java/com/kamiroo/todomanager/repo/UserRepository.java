@@ -14,4 +14,5 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
     @Query(value = "select * from user_entity", nativeQuery = true)
     List<UserEntity> findAllUsers();
 
+    List<UserEntity> deleteByFirstNameAndLastName(String firstName, String lastName);
 }

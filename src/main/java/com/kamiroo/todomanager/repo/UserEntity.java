@@ -1,6 +1,7 @@
 package com.kamiroo.todomanager.repo;
 
 import javax.persistence.*;
+import javax.validation.constraints.NotBlank;
 import java.util.List;
 
 import static javax.persistence.GenerationType.SEQUENCE;
@@ -28,6 +29,7 @@ public class UserEntity {
             nullable = false,
             columnDefinition = "varchar(35)"
     )
+    @NotBlank(message = "login is mandatory")
     private String login;
 
     @Column(
@@ -35,6 +37,7 @@ public class UserEntity {
             nullable = false,
             columnDefinition = "varchar(20)"
     )
+    @NotBlank(message = "firstName is mandatory")
     private String firstName;
 
     @Column(
@@ -42,6 +45,7 @@ public class UserEntity {
             nullable = false,
             columnDefinition = "varchar(20)"
     )
+    @NotBlank(message = "lastName is mandatory")
     private String lastName;
 
     @Column(
@@ -50,10 +54,11 @@ public class UserEntity {
             columnDefinition = "varchar(40)",
             unique = true
     )
+    @NotBlank(message = "email is mandatory")
     private String email;
 
-    @OneToMany
-    @JoinColumn(name = "toDo_id")
+    @OneToMany(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user_id")
     private List<ToDoEntity> toDoEntities;
 
     public UserEntity(String login, String firstName, String lastName, String email) {
@@ -104,6 +109,14 @@ public class UserEntity {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public List<ToDoEntity> getToDoEntities() {
+        return toDoEntities;
+    }
+
+    public void setToDoEntities(List<ToDoEntity> toDoEntities) {
+        this.toDoEntities = toDoEntities;
     }
 
     @Override

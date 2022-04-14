@@ -1,11 +1,16 @@
 package com.kamiroo.todomanager.repo;
 
+import com.kamiroo.todomanager.PriorityEnum;
+import com.kamiroo.todomanager.StatusEnum;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.LastModifiedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 @Table(name = "toDo")
 public class ToDoEntity {
 
@@ -33,14 +38,14 @@ public class ToDoEntity {
             nullable = false,
             columnDefinition = "varchar(20)"
     )
-    private Enum status;
+    private StatusEnum status;
 
     @Column(
             name = "priority",
             nullable = false,
             columnDefinition = "varchar(20)"
     )
-    private String priority;
+    private PriorityEnum priority;
 
     @CreatedDate
     private LocalDate createDate;
@@ -71,19 +76,19 @@ public class ToDoEntity {
         this.description = description;
     }
 
-    public Enum getStatus() {
+    public StatusEnum getStatus() {
         return status;
     }
 
-    public void setStatus(Enum status) {
+    public void setStatus(StatusEnum status) {
         this.status = status;
     }
 
-    public String getPriority() {
+    public PriorityEnum getPriority() {
         return priority;
     }
 
-    public void setPriority(String priority) {
+    public void setPriority(PriorityEnum priority) {
         this.priority = priority;
     }
 

@@ -1,41 +1,61 @@
 package com.kamiroo.todomanager.rest;
 
 import com.kamiroo.todomanager.repo.UserEntity;
-import com.kamiroo.todomanager.repo.UserRepository;
-import com.kamiroo.todomanager.service.UserService;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.client.TestRestTemplate;
+import org.springframework.boot.web.server.LocalServerPort;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
-import javax.transaction.Transactional;
+import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 
-
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 public class UserControllerTest {
 
-    @Autowired
-    private UserRestController userRestController;
+    @LocalServerPort
+    private int port;
 
     @Autowired
-    private UserRepository userRepository;
-
-    private UserService userService;
+    private TestRestTemplate testRestTemplate;
 
     @Test
-    @Transactional
     public void addUserTest() throws Exception {
-           UserEntity user = new UserEntity(
-                   "Kamior",
-                   "Kamil",
-                   "Dominik",
-                   "kamil23.dominik@gmail.com"
-           );
+        UserEntity user = new UserEntity(
+                "Kamior",
+                "Kamil",
+                "Dominik",
+                "kamil23.dominik@gmail.com"
+        );
 
-           UserEntity savedUser = userRepository.save(user);
+        String url = "http://localhost:" + port + "/addUser";
 
-           assertEquals(user, savedUser);
+        ResponseEntity<UserEntity> entityResponseEntity = this.testRestTemplate.postForEntity(url, user, UserEntity.class);
+
+        assertThat(entityResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
+
+        assertThat(entityResponseEntity.getBody().getEmail()).isEqualTo(user.getEmail());
+
+
     }
+
+//    @Test
+//    @Transactional
+//    public void deleteUserTest() throws Exception {
+//        UserEntity user = new UserEntity(
+//                "Kamior",
+//                "Kamil",
+//                "Dominik",
+//                "kamil23.dominik@gmail.com"
+//        );
+//
+//        userRepository.save(user);
+//        userRepository.deleteUserEntityByUserId(user.getUserId());
+//        assertFalse(userRepository.existsById(user.getUserId()));
+//    }
+
 }
