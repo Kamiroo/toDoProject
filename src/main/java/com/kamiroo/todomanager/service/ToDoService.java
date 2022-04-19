@@ -65,4 +65,9 @@ public class ToDoService {
 
     }
 
+    @Transactional
+    public List<ToDoEntity> findToDosByUserIdAndStatus(Long userId, StatusEnum status) {
+        return toDoRepository.findByUserEntityUserIdAndStatus(userId, status);
+    }
+
 }

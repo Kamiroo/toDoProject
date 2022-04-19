@@ -1,5 +1,6 @@
 package com.kamiroo.todomanager.repo;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.kamiroo.todomanager.PriorityEnum;
 import com.kamiroo.todomanager.StatusEnum;
 import org.springframework.data.annotation.CreatedDate;
@@ -51,6 +52,12 @@ public class ToDoEntity {
     private LocalDate createDate;
     @LastModifiedDate
     private LocalDate updateDate;
+
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private UserEntity userEntity;
 
     public Long getToDoId() {
         return toDoId;
@@ -106,5 +113,13 @@ public class ToDoEntity {
 
     public void setUpdateDate(LocalDate updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public UserEntity getUserEntity() {
+        return userEntity;
+    }
+
+    public void setUserEntity(UserEntity userEntity) {
+        this.userEntity = userEntity;
     }
 }

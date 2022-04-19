@@ -39,4 +39,9 @@ public class ToDoRestController extends AbstractToDoRestController{
     public List<ToDoEntity> getTodoForUserWhereStatus(Long userId, StatusEnum statusEnum) {
         return toDoService.getToDoEntityByToDoIdAndStatus(userId, statusEnum);
     }
+
+    @GetMapping("/byUserAndStatus")
+    public List<ToDoEntity> findToDosByUserIdAndStatus(@RequestParam Long userId, @RequestParam StatusEnum status) {
+        return toDoService.findToDosByUserIdAndStatus(userId, status);
+    }
 }
