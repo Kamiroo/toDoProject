@@ -29,7 +29,7 @@ public class UserControllerTest {
                 "Kamior",
                 "Kamil",
                 "Dominik",
-                "kamil23.dominik@gmail.com"
+                "kamil2323.dominik@gmail.com"
         );
 
         String url = "http://localhost:" + port + "/addUser";
@@ -39,23 +39,5 @@ public class UserControllerTest {
         assertThat(entityResponseEntity.getStatusCode()).isEqualTo(HttpStatus.OK);
 
         assertThat(entityResponseEntity.getBody().getEmail()).isEqualTo(user.getEmail());
-
-
     }
-
-//    @Test
-//    @Transactional
-//    public void deleteUserTest() throws Exception {
-//        UserEntity user = new UserEntity(
-//                "Kamior",
-//                "Kamil",
-//                "Dominik",
-//                "kamil23.dominik@gmail.com"
-//        );
-//
-//        userRepository.save(user);
-//        userRepository.deleteUserEntityByUserId(user.getUserId());
-//        assertFalse(userRepository.existsById(user.getUserId()));
-//    }
-
 }

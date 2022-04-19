@@ -57,7 +57,7 @@ public class UserEntity {
     @NotBlank(message = "email is mandatory")
     private String email;
 
-    @OneToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER )
     @JoinColumn(name = "user_id")
     private List<ToDoEntity> toDoEntities;
 
