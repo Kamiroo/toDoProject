@@ -8,6 +8,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @EntityListeners(AuditingEntityListener.class)
@@ -51,6 +52,10 @@ public class ToDoEntity {
     private LocalDate createDate;
     @LastModifiedDate
     private LocalDate updateDate;
+
+    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER )
+    @JoinColumn(name = "toDo_id")
+    private List<CommentEntity> commentEntities;
 
     public Long getToDoId() {
         return toDoId;
@@ -106,5 +111,13 @@ public class ToDoEntity {
 
     public void setUpdateDate(LocalDate updateDate) {
         this.updateDate = updateDate;
+    }
+
+    public List<CommentEntity> getCommentEntities() {
+        return commentEntities;
+    }
+
+    public void setCommentEntities(List<CommentEntity> commentEntities) {
+        this.commentEntities = commentEntities;
     }
 }

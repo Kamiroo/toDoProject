@@ -1,7 +1,9 @@
 package com.kamiroo.todomanager.service;
 
+import com.kamiroo.todomanager.PriorityEnum;
 import com.kamiroo.todomanager.StatusEnum;
 import com.kamiroo.todomanager.ToDo;
+import com.kamiroo.todomanager.exception.ResourceNotFoundException;
 import com.kamiroo.todomanager.repo.ToDoEntity;
 import com.kamiroo.todomanager.repo.ToDoRepository;
 import com.kamiroo.todomanager.repo.UserEntity;
@@ -56,13 +58,53 @@ public class ToDoService {
     }
 
     public List<ToDoEntity> getTodoByTodoId(Long todoId){
-        return toDoRepository.findToDoEntityByToDoId(todoId);
+        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
+        if(!list.isEmpty()){
+            return toDoRepository.findToDoEntityByToDoId(todoId);
+        }
+        else {
+            throw new ResourceNotFoundException();
+        }
     }
 
     public List<ToDoEntity> getToDoEntityByToDoIdAndStatus(Long userId, StatusEnum statusEnum) {
-
         return toDoRepository.findByUserIdAndStatus(userId, statusEnum.ordinal());
+    }
+
+    public List<ToDoEntity> getTodoForUserWhereStatusAndPriority(Long userId, StatusEnum statusEnum, PriorityEnum priorityEnum) {
+        return toDoRepository.findByUserIdAndStatusAndPriority(userId, statusEnum.ordinal(), priorityEnum.ordinal());
+    }
+
+    public void deleteByToDoIdWhereStatusIsOpen(Long todoId) {
+        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
+        ToDoEntity toDoEntity = list.get(0);
+        if(!list.isEmpty() && toDoEntity.getStatus() == StatusEnum.OPEN) {
+            toDoRepository.deleteByToDoIdWhereStatusIsOpen(todoId);
+        } else if(!list.isEmpty() && toDoEntity.getStatus() != StatusEnum.OPEN) {
+            throw new ResourceNotFoundException("Delete failed! You can't change todo's when it's status is IN_PROGRESS/CLOSED");
+        } else {
+            throw new ResourceNotFoundException();
+        }
 
     }
 
+    public void updateTodoOnTitleAndDescription(Long todoId, String title, String description) {
+        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
+        if(!list.isEmpty()){
+            toDoRepository.updateTodoOnTitleAndDescription(todoId, title, description);
+        }
+        else {
+            throw new ResourceNotFoundException();
+        }
+    }
+
+    public void updateTodoOnPriority(Long todoId, PriorityEnum priorityEnum) {
+        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
+        if(!list.isEmpty()){
+            toDoRepository.updateTodoOnPriority(todoId, priorityEnum.ordinal());
+        }
+        else {
+            throw new ResourceNotFoundException();
+        }
+    }
 }

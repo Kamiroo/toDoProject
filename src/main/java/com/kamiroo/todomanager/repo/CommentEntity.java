@@ -2,11 +2,9 @@ package com.kamiroo.todomanager.repo;
 
 import org.springframework.data.annotation.CreatedDate;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
+import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 public class CommentEntity {
@@ -31,4 +29,36 @@ public class CommentEntity {
     )
     private LocalDate createDate;
 
+    public CommentEntity() {
+    }
+
+    public CommentEntity(Long commentId, String comment, LocalDate createDate) {
+        this.commentId = commentId;
+        this.comment = comment;
+        this.createDate = createDate;
+    }
+
+    public Long getCommentId() {
+        return commentId;
+    }
+
+    public void setCommentId(Long commentId) {
+        this.commentId = commentId;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+
+    public void setComment(String comment) {
+        this.comment = comment;
+    }
+
+    public LocalDate getCreateDate() {
+        return createDate;
+    }
+
+    public void setCreateDate(LocalDate createDate) {
+        this.createDate = createDate;
+    }
 }

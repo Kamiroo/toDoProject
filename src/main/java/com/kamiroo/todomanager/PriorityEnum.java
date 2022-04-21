@@ -1,9 +1,11 @@
 package com.kamiroo.todomanager;
 
 public enum PriorityEnum {
-    HIGH("High"),
+    LOW("Low"),
     NORMAL("Normal"),
-    LOW("Low");
+    HIGH("High");
+
+
 
     private String displayName;
 
