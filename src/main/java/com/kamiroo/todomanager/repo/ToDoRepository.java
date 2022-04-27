@@ -30,12 +30,9 @@ public interface ToDoRepository extends JpaRepository<ToDoEntity, Long> {
 
     @Modifying
     @Transactional
-    @Query(value = "delete from to_do where to_do_id = :todoId and status = 0", nativeQuery = true)
-    void deleteByToDoIdWhereStatusIsOpen(@Param("todoId") Long todoId);
-
-    @Modifying
-    @Transactional
     @Query(value = "update to_do set priority = :priority where to_do_id = :todoId", nativeQuery = true)
     void updateTodoOnPriority(@Param("todoId") Long todoId, @Param("priority") int priorityNumber);
+
+
 
 }

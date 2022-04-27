@@ -1,8 +1,7 @@
 package com.kamiroo.todomanager.rest;
 
-import com.kamiroo.todomanager.PriorityEnum;
-import com.kamiroo.todomanager.StatusEnum;
-import com.kamiroo.todomanager.ToDo;
+import com.kamiroo.todomanager.*;
+import com.kamiroo.todomanager.repo.CommentEntity;
 import com.kamiroo.todomanager.repo.ToDoEntity;
 import com.kamiroo.todomanager.repo.UserEntity;
 import com.kamiroo.todomanager.service.ToDoService;
@@ -12,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.PostUpdate;
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 @RestController
@@ -33,7 +33,7 @@ public class ToDoRestController extends AbstractToDoRestController{
     }
 
     @GetMapping("/getTodoByTodoId")
-    public List<ToDoEntity> getTodoByTodoId(@RequestParam(defaultValue = "5") Long todoId) {
+    public ToDoEntity getTodoByTodoId(@RequestParam(defaultValue = "5") Long todoId) {
         return toDoService.getTodoByTodoId(todoId);
     }
 
@@ -42,9 +42,19 @@ public class ToDoRestController extends AbstractToDoRestController{
         return toDoService.getToDoEntityByToDoIdAndStatus(userId, statusEnum);
     }
 
+    @GetMapping("/getToDoEntityByToDoIdAndStatusJava")
+    public List<ToDoEntity> getToDoEntityByToDoIdAndStatusJava(Long userId, StatusEnum statusEnum) {
+        return toDoService.getToDoEntityByToDoIdAndStatusJava(userId, statusEnum);
+    }
+
     @GetMapping("/getTodoForUserWhereStatusAndPriority")
     public List<ToDoEntity> getTodoForUserWhereStatusAndPriority(Long userId, StatusEnum statusEnum, PriorityEnum priorityEnum) {
         return toDoService.getTodoForUserWhereStatusAndPriority(userId, statusEnum, priorityEnum);
+    }
+
+    @GetMapping("/getTodoForUserWhereStatusAndPriorityJava")
+    public List<ToDoEntity> getTodoForUserWhereStatusAndPriorityJava(Long userId, StatusEnum statusEnum, PriorityEnum priorityEnum) {
+        return toDoService.getTodoForUserWhereStatusAndPriorityJava(userId, statusEnum, priorityEnum);
     }
 
     @DeleteMapping("/deleteTodoByTodoId")
@@ -61,4 +71,20 @@ public class ToDoRestController extends AbstractToDoRestController{
     public void updateTodoOnPriority(Long todoId, PriorityEnum priorityEnum) {
         toDoService.updateTodoOnPriority(todoId, priorityEnum);
     }
+
+    @PutMapping("/updateTodoOnStatus")
+    public void updateTodoOnStatus(@RequestParam Long todoId, @RequestParam StatusEnum statusEnum) {
+        toDoService.updateTodoOnStatus(todoId, statusEnum);
+    }
+
+    @PostMapping("/updateStatusAndOptionalAddComment")
+    public void updateStatusAndOptionalAddComment(Long todoId, StatusEnum statusEnum,@RequestBody(required = false) Comment comment ) {
+        toDoService.updateStatusAndOptionalAddComment(todoId, statusEnum, Optional.ofNullable(comment));
+    }
+
+    @PostMapping("/addComment")
+    public CommentEntity addComment(@RequestBody Comment comment) {
+        return toDoService.addComment(comment);
+    }
+
 }

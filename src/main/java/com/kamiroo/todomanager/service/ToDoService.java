@@ -1,12 +1,8 @@
 package com.kamiroo.todomanager.service;
 
-import com.kamiroo.todomanager.PriorityEnum;
-import com.kamiroo.todomanager.StatusEnum;
-import com.kamiroo.todomanager.ToDo;
+import com.kamiroo.todomanager.*;
 import com.kamiroo.todomanager.exception.ResourceNotFoundException;
-import com.kamiroo.todomanager.repo.ToDoEntity;
-import com.kamiroo.todomanager.repo.ToDoRepository;
-import com.kamiroo.todomanager.repo.UserEntity;
+import com.kamiroo.todomanager.repo.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +12,9 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class ToDoService {
@@ -28,6 +27,9 @@ public class ToDoService {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private CommentRepository commentRepository;
+
     @Transactional(Transactional.TxType.REQUIRED)
     public ToDoEntity addTodo(ToDo toDo) {
         UserEntity user = userService.findUserById(toDo.getUserId());
@@ -36,7 +38,6 @@ public class ToDoService {
         toDoEntity.setDescription(toDo.getDescription());
         toDoEntity.setPriority(toDo.getPriority());
         toDoEntity.setStatus(toDo.getStatus());
-//        toDoRepository.save(toDoEntity);
         toDoEntity = toDoRepository.save(toDoEntity);
         List<ToDoEntity> todoList;
         if(Objects.isNull(user.getToDoEntities())){
@@ -57,54 +58,97 @@ public class ToDoService {
         return todoList;
     }
 
-    public List<ToDoEntity> getTodoByTodoId(Long todoId){
-        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
-        if(!list.isEmpty()){
-            return toDoRepository.findToDoEntityByToDoId(todoId);
-        }
-        else {
-            throw new ResourceNotFoundException();
-        }
+    public ToDoEntity getTodoByTodoId(Long todoId){
+        return toDoRepository.findById(todoId).orElseThrow(() -> new ResourceNotFoundException("ToDo with ID " + todoId + " not found."));
     }
 
     public List<ToDoEntity> getToDoEntityByToDoIdAndStatus(Long userId, StatusEnum statusEnum) {
         return toDoRepository.findByUserIdAndStatus(userId, statusEnum.ordinal());
     }
 
+    public List<ToDoEntity> getToDoEntityByToDoIdAndStatusJava(Long userId, StatusEnum statusEnum){
+        return userService.findUserById(userId)
+                .getToDoEntities()
+                .stream()
+                .filter(status -> status.equals(statusEnum))
+                .collect(Collectors.toList());
+    }
+
     public List<ToDoEntity> getTodoForUserWhereStatusAndPriority(Long userId, StatusEnum statusEnum, PriorityEnum priorityEnum) {
         return toDoRepository.findByUserIdAndStatusAndPriority(userId, statusEnum.ordinal(), priorityEnum.ordinal());
     }
 
-    public void deleteByToDoIdWhereStatusIsOpen(Long todoId) {
-        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
-        ToDoEntity toDoEntity = list.get(0);
-        if(!list.isEmpty() && toDoEntity.getStatus() == StatusEnum.OPEN) {
-            toDoRepository.deleteByToDoIdWhereStatusIsOpen(todoId);
-        } else if(!list.isEmpty() && toDoEntity.getStatus() != StatusEnum.OPEN) {
-            throw new ResourceNotFoundException("Delete failed! You can't change todo's when it's status is IN_PROGRESS/CLOSED");
-        } else {
-            throw new ResourceNotFoundException();
+    public List<ToDoEntity> getTodoForUserWhereStatusAndPriorityJava(Long userId, StatusEnum statusEnum, PriorityEnum priorityEnum) {
+        UserEntity userEntity = userService.findUserById(userId);
+        List<ToDoEntity> toDoEntity = userEntity.getToDoEntities();
+        List<ToDoEntity> filteredList = new ArrayList<>();
+        for(ToDoEntity toDo : toDoEntity) {
+            if (toDo.getStatus().equals(statusEnum) && toDo.getPriority().equals(priorityEnum)) {
+                filteredList.add(toDo);
+            }
         }
+        return filteredList;
+    }
 
+    public void deleteByToDoIdWhereStatusIsOpen(Long todoId) {
+        ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
+
+        if(toDoEntity.getStatus() == StatusEnum.OPEN) {
+            toDoRepository.deleteById(todoId);
+        } else {
+            throw new ResourceNotFoundException("Delete failed! You can't change todo's when it's status is IN_PROGRESS/CLOSED");
+        }
     }
 
     public void updateTodoOnTitleAndDescription(Long todoId, String title, String description) {
-        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
-        if(!list.isEmpty()){
-            toDoRepository.updateTodoOnTitleAndDescription(todoId, title, description);
-        }
-        else {
-            throw new ResourceNotFoundException();
-        }
+        toDoRepository.updateTodoOnTitleAndDescription(todoId, title, description);
     }
 
     public void updateTodoOnPriority(Long todoId, PriorityEnum priorityEnum) {
-        List<ToDoEntity> list = toDoRepository.findToDoEntityByToDoId(todoId);
-        if(!list.isEmpty()){
-            toDoRepository.updateTodoOnPriority(todoId, priorityEnum.ordinal());
+        toDoRepository.updateTodoOnPriority(todoId, priorityEnum.ordinal());
+    }
+
+    public ToDoEntity updateTodoOnStatus(Long todoId, StatusEnum statusEnum) {
+        ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
+        toDoEntity.setStatus(statusEnum);
+        return toDoRepository.save(toDoEntity);
+    }
+
+    public ToDoEntity saveTodo(ToDoEntity toDoEntity) {
+        return toDoRepository.save(toDoEntity);
+    }
+
+    private ToDoEntity findTodoByIdOrThrowsException(Long todoId) {
+        return toDoRepository.findById(todoId).orElseThrow(() -> new ResourceNotFoundException("ToDo with ID " + todoId + " not found."));
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public CommentEntity addComment(Comment comment) {
+        ToDoEntity toDoEntity = getTodoByTodoId(comment.getTodoId());
+        return saveCommentEntity(comment, toDoEntity);
+    }
+
+    public void updateStatusAndOptionalAddComment(Long todoId, StatusEnum statusEnum, Optional<Comment> comment) {
+        updateTodoOnStatus(todoId, statusEnum);
+        if (comment.isPresent()) {
+            addComment(comment.get());
         }
-        else {
-            throw new ResourceNotFoundException();
+    }
+
+    @Transactional(Transactional.TxType.REQUIRED)
+    public CommentEntity saveCommentEntity(Comment comment, ToDoEntity toDoEntity) {
+        CommentEntity comment1 = new CommentEntity();
+        comment1.setComment(comment.getComment());
+        comment1 = commentRepository.save(comment1);
+        List<CommentEntity> commentList;
+        if(Objects.isNull(toDoEntity.getCommentEntities())) {
+            commentList = new ArrayList<>();
+        } else {
+            commentList = toDoEntity.getCommentEntities();
         }
+        commentList.add(comment1);
+        toDoEntity.setCommentEntities(commentList);
+        saveTodo(toDoEntity);
+        return comment1;
     }
 }

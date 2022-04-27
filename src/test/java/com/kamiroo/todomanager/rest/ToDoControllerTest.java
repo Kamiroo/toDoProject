@@ -3,6 +3,7 @@ package com.kamiroo.todomanager.rest;
 import com.kamiroo.todomanager.PriorityEnum;
 import com.kamiroo.todomanager.StatusEnum;
 import com.kamiroo.todomanager.ToDo;
+import com.kamiroo.todomanager.exception.ResourceNotFoundException;
 import com.kamiroo.todomanager.repo.ToDoEntity;
 import com.kamiroo.todomanager.repo.UserEntity;
 import com.kamiroo.todomanager.service.UserService;
@@ -23,7 +24,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -218,7 +219,7 @@ public class ToDoControllerTest {
     }
 
     @Test
-    public void deleteTodoByTodoIdTestReturns200() {
+    public void deleteTodoByTodoIdTestShouldSuccess() {
 
         UserEntity user = new UserEntity("Miro",
                 "Konrad",
@@ -245,16 +246,11 @@ public class ToDoControllerTest {
 
         this.testRestTemplate.delete(url);
 
-        toDoRestController.getTodoByTodoId(addedToDo.getToDoId());
-
-        String url2 = "http://localhost:" + port + "/findTodoForUser?userId=" + addedUser.getUserId();
-
-        ResponseEntity<String> result = this.testRestTemplate.getForEntity(url2, String.class);
+        assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> toDoRestController.getTodoByTodoId(addedToDo.getToDoId()));
     }
 
-
     @Test
-    public void updateTodoOnTitleAndDescriptionTestReturns() {
+    public void deleteTodoByTodoIdTestShouldFailTest() {
 
         UserEntity user = new UserEntity("Miro",
                 "Konrad",
@@ -271,15 +267,50 @@ public class ToDoControllerTest {
                 addedUser.getUserId()
         );
 
-        String title = "This is new title for already existing ToDo";
-        String description = "This is new description for already existing ToDo";
+        ToDoEntity addedToDo = toDoRestController.addTodo(todo);
+
+        List<ToDoEntity> list = toDoRestController.findTodoForUser(addedUser.getUserId());
+
+        assertTrue(list.size() == 1);
+
+        Long notExistingId = addedToDo.getToDoId() + 1;
+
+        String url = "http://localhost:" + port + "/deleteTodoByTodoId?todoId=" + notExistingId;
+
+        Throwable exception = catchThrowable(() -> toDoRestController.deleteTodoByTodoId(notExistingId));
+
+        assertThat(exception).isInstanceOf(ResourceNotFoundException.class)
+                .hasMessageContaining("ToDo with ID " + notExistingId + " not found.");
+    }
+
+    @Test
+    public void updateTodoOnTitleAndDescriptionSuccessTest() {
+
+        UserEntity user = new UserEntity("Miro",
+                "Konrad",
+                "Kowalski",
+                "konrad@interia.pl"
+        );
+
+        UserEntity addedUser = userRestController.addUser(user);
+
+        ToDo todo = new ToDo("Find todo's by todoId",
+                "Find todo",
+                StatusEnum.OPEN,
+                PriorityEnum.LOW,
+                addedUser.getUserId()
+        );
 
         ToDoEntity addedToDo = toDoRestController.addTodo(todo);
 
-        String url = "http://localhost:" + port + "/updateTodoOnTitleAndDescription?todoId="+ addedToDo.getToDoId() + "&title=" + title + "&description=" + description;
+        String title = "This is new title for already existing ToDo";
+        String description = "This is new description for already existing ToDo";
 
+        toDoRestController.updateTodoOnTitleAndDescription(addedToDo.getToDoId(), title, description);
 
-//        ResponseEntity<String> result = this.testRestTemplate.put(url, );
+        ToDoEntity updatedTodo = toDoRestController.getTodoByTodoId(addedToDo.getToDoId());
+
+        assertTrue(updatedTodo.getDescription().equals(description) && updatedTodo.getTitle().equals(title));
 
     }
 
