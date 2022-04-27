@@ -151,4 +151,9 @@ public class ToDoService {
         saveTodo(toDoEntity);
         return comment1;
     }
+
+    public List<CommentEntity> getAllCommentsForTodoId(Long todoId) {
+        return findTodoByIdOrThrowsException(todoId).getCommentEntities();
+    }
+
 }

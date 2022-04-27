@@ -4,10 +4,7 @@ import com.kamiroo.todomanager.repo.UserEntity;
 import com.kamiroo.todomanager.repo.UserRepository;
 import com.kamiroo.todomanager.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -27,7 +24,7 @@ public class UserRestController extends AbstractToDoRestController {
     }
 
     @GetMapping("/getUser")
-    public List<UserEntity> getUser(String firstName) {
+    public List<UserEntity> getUser(@RequestParam String firstName) {
         return userRepository.findByFirstName(firstName);
     }
 
@@ -37,7 +34,7 @@ public class UserRestController extends AbstractToDoRestController {
     }
 
     @PostMapping("/deleteUser")
-    public List<UserEntity> deleteUser(@RequestBody String firstName, String lastName) {
+    public List<UserEntity> deleteUser(@RequestParam String firstName, @RequestParam String lastName) {
         return userRepository.deleteByFirstNameAndLastName(firstName, lastName);
     }
 
