@@ -87,4 +87,9 @@ public class ToDoRestController extends AbstractToDoRestController{
         return toDoService.addComment(comment);
     }
 
+    @GetMapping("/getAllCommentsForTodoId")
+    public List<CommentEntity> getAllCommentsForTodoId(Long todoId) {
+        return toDoService.getAllCommentsForTodoId(todoId);
+    }
+
 }
