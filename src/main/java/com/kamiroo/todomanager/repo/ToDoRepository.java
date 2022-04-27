@@ -1,8 +1,5 @@
 package com.kamiroo.todomanager.repo;
 
-import com.kamiroo.todomanager.PriorityEnum;
-import com.kamiroo.todomanager.StatusEnum;
-import com.kamiroo.todomanager.ToDo;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;

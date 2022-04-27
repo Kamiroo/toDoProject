@@ -153,9 +153,7 @@ public class ToDoService {
     }
 
     public List<CommentEntity> getAllCommentsForTodoId(Long todoId) {
-        ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
-        List<CommentEntity> commentEntityList = toDoEntity.getCommentEntities();
-        return commentEntityList;
+        return findTodoByIdOrThrowsException(todoId).getCommentEntities();
     }
 
 }
