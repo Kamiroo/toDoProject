@@ -14,14 +14,14 @@ public class AdministrationRestController {
     private Environment environment;
 
     @Value("${app.version}")
-    private String valueFromFile;
+    private String version;
 
-    @GetMapping("/getVersion")
+    @GetMapping("/version")
     public String getVerison() {
-        return valueFromFile;
+        return version;
     }
 
-    @GetMapping("/getActiveProfile")
+    @GetMapping("/active-profile")
     public String[] getActiveProfile() {
         return this.environment.getActiveProfiles();
     }
