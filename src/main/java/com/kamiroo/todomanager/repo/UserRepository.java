@@ -16,6 +16,7 @@ public interface UserRepository extends JpaRepository<UserEntity, Long> {
 
     List<UserEntity> deleteByFirstNameAndLastName(String firstName, String lastName);
 
+    UserEntity findByToDoEntities(ToDoEntity toDoEntity);
     //List<UserEntity> findByToDoEntities
 
 }

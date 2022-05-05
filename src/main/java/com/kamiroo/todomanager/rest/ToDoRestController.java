@@ -18,8 +18,6 @@ import java.util.Random;
 @RestController
 public class ToDoRestController extends AbstractToDoRestController{
 
-    public Random randomNumber = new Random();
-
     @Autowired
     private ToDoService toDoService;
 

@@ -28,7 +28,13 @@ public class ToDoService {
     private UserService userService;
 
     @Autowired
+    private EmailSenderService emailSenderService;
+
+    @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ToDoEntity addTodo(ToDo toDo) {
@@ -110,6 +116,11 @@ public class ToDoService {
 
     public ToDoEntity updateTodoOnStatus(Long todoId, StatusEnum statusEnum) {
         ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
+        if(statusEnum.equals(StatusEnum.IN_PROGRESS) || statusEnum.equals(StatusEnum.CLOSED)){
+            emailSenderService.sendEmail(userRepository.findByToDoEntities(toDoEntity).getEmail(),
+                    "Todo's status changed",
+                    "Your's ToDo '" + toDoEntity.getTitle() + "' status has been changed from " + toDoEntity.getStatus() + " to " + statusEnum);
+        }
         toDoEntity.setStatus(statusEnum);
         return toDoRepository.save(toDoEntity);
     }
