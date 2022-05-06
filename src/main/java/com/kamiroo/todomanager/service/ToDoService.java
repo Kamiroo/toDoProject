@@ -116,10 +116,11 @@ public class ToDoService {
 
     public ToDoEntity updateTodoOnStatus(Long todoId, StatusEnum statusEnum) {
         ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
-        if(statusEnum.equals(StatusEnum.IN_PROGRESS) || statusEnum.equals(StatusEnum.CLOSED)){
+        if((statusEnum.equals(StatusEnum.IN_PROGRESS) &&toDoEntity.getStatus().equals(StatusEnum.OPEN)) ||
+                (statusEnum.equals(StatusEnum.CLOSED) &&toDoEntity.getStatus().equals(StatusEnum.IN_PROGRESS))){
             emailSenderService.sendEmail(userRepository.findByToDoEntities(toDoEntity).getEmail(),
                     "Todo's status changed",
-                    "Your's ToDo '" + toDoEntity.getTitle() + "' status has been changed from " + toDoEntity.getStatus() + " to " + statusEnum);
+                    "Your's ToDo '" + toDoEntity.getTitle() + "' status has been changed from " + toDoEntity.getStatus().name() + " to " + statusEnum.name());
         }
         toDoEntity.setStatus(statusEnum);
         return toDoRepository.save(toDoEntity);
