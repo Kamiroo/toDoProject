@@ -2,6 +2,7 @@ package com.kamiroo.todomanager.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
@@ -13,6 +14,12 @@ import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 @EnableWebSecurity
 @Configuration
 public class SecutiryConfig extends WebSecurityConfigurerAdapter {
+
+//    @Bean
+//    public JavaMailSender javaMailSender() {
+//        return new JavaMailSender();
+//    }
+
 
     @Bean
     public UserDetailsService userDetailsService() {
