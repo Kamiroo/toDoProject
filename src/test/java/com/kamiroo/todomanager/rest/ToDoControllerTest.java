@@ -132,7 +132,7 @@ public class ToDoControllerTest {
 
         String url = "http://localhost:" + port + "/findTodoForUser?userId=" + randomId.nextLong();
 
-        ResponseEntity<String> result = this.testRestTemplate.getForEntity(url, String.class);
+        ResponseEntity<String> result = this.testRestTemplate.withBasicAuth("admin", "admin1").getForEntity(url, String.class);
 
         assertEquals(404, result.getStatusCodeValue());
     }

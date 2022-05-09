@@ -2,15 +2,24 @@ package com.kamiroo.todomanager.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 
+@EnableWebSecurity
 @Configuration
 public class SecutiryConfig extends WebSecurityConfigurerAdapter {
+
+//    @Bean
+//    public JavaMailSender javaMailSender() {
+//        return new JavaMailSender();
+//    }
+
 
     @Bean
     public UserDetailsService userDetailsService() {
@@ -32,12 +41,16 @@ public class SecutiryConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/getAllComments", "/addComment").permitAll()
+                .antMatchers("/addComment").permitAll()
                 .anyRequest().hasRole("ADMIN")
+                .and()
+                .httpBasic()
                 .and()
                 .formLogin().permitAll()
                 .and()
-                .logout().permitAll();
+                .logout().permitAll()
+                .and()
+                .csrf().disable();
     }
 
 }

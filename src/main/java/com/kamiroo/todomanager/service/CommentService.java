@@ -6,6 +6,7 @@ import com.kamiroo.todomanager.repo.CommentEntity;
 import com.kamiroo.todomanager.repo.CommentRepository;
 import com.kamiroo.todomanager.repo.ToDoEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -26,6 +27,7 @@ public class CommentService {
         return commentRepository.findById(commentId).orElseThrow(() -> new ResourceNotFoundException("User with id " + commentId + " not found"));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     public List<CommentEntity> getAllComments() {
         return commentRepository.findAll();
     }

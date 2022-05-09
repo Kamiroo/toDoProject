@@ -28,7 +28,13 @@ public class ToDoService {
     private UserService userService;
 
     @Autowired
+    private EmailSenderService emailSenderService;
+
+    @Autowired
     private CommentRepository commentRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Transactional(Transactional.TxType.REQUIRED)
     public ToDoEntity addTodo(ToDo toDo) {
@@ -40,7 +46,7 @@ public class ToDoService {
         toDoEntity.setStatus(toDo.getStatus());
         toDoEntity = toDoRepository.save(toDoEntity);
         List<ToDoEntity> todoList;
-        if(Objects.isNull(user.getToDoEntities())){
+        if (Objects.isNull(user.getToDoEntities())) {
             todoList = new ArrayList<>();
         } else {
             todoList = user.getToDoEntities();
@@ -58,7 +64,7 @@ public class ToDoService {
         return todoList;
     }
 
-    public ToDoEntity getTodoByTodoId(Long todoId){
+    public ToDoEntity getTodoByTodoId(Long todoId) {
         return toDoRepository.findById(todoId).orElseThrow(() -> new ResourceNotFoundException("ToDo with ID " + todoId + " not found."));
     }
 
@@ -66,7 +72,7 @@ public class ToDoService {
         return toDoRepository.findByUserIdAndStatus(userId, statusEnum.ordinal());
     }
 
-    public List<ToDoEntity> getToDoEntityByToDoIdAndStatusJava(Long userId, StatusEnum statusEnum){
+    public List<ToDoEntity> getToDoEntityByToDoIdAndStatusJava(Long userId, StatusEnum statusEnum) {
         return userService.findUserById(userId)
                 .getToDoEntities()
                 .stream()
@@ -82,7 +88,7 @@ public class ToDoService {
         UserEntity userEntity = userService.findUserById(userId);
         List<ToDoEntity> toDoEntity = userEntity.getToDoEntities();
         List<ToDoEntity> filteredList = new ArrayList<>();
-        for(ToDoEntity toDo : toDoEntity) {
+        for (ToDoEntity toDo : toDoEntity) {
             if (toDo.getStatus().equals(statusEnum) && toDo.getPriority().equals(priorityEnum)) {
                 filteredList.add(toDo);
             }
@@ -93,7 +99,7 @@ public class ToDoService {
     public void deleteByToDoIdWhereStatusIsOpen(Long todoId) {
         ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
 
-        if(toDoEntity.getStatus() == StatusEnum.OPEN) {
+        if (toDoEntity.getStatus() == StatusEnum.OPEN) {
             toDoRepository.deleteById(todoId);
         } else {
             throw new ResourceNotFoundException("Delete failed! You can't change todo's when it's status is IN_PROGRESS/CLOSED");
@@ -104,12 +110,34 @@ public class ToDoService {
         toDoRepository.updateTodoOnTitleAndDescription(todoId, title, description);
     }
 
+    public int deleteTodoWhereStatusClosed() {
+        int listSizeBefore = toDoRepository.findAll().size();
+        int listSizeAfter = 0;
+        if (toDoRepository.findAll().size() != 0) {
+            List<ToDoEntity> toDelete = toDoRepository.findAll().stream()
+                    .filter(status -> status.getStatus() == StatusEnum.CLOSED)
+                    .collect(Collectors.toList());
+            listSizeAfter = toDelete.size();
+            for(int i = 0; i < toDelete.size() && toDelete.get(i).getStatus() == StatusEnum.CLOSED; i++){
+                toDoRepository.delete(toDelete.get(i));
+            }
+            listSizeAfter = toDelete.size();
+        }
+        return listSizeAfter;
+    }
+
     public void updateTodoOnPriority(Long todoId, PriorityEnum priorityEnum) {
         toDoRepository.updateTodoOnPriority(todoId, priorityEnum.ordinal());
     }
 
     public ToDoEntity updateTodoOnStatus(Long todoId, StatusEnum statusEnum) {
         ToDoEntity toDoEntity = findTodoByIdOrThrowsException(todoId);
+        if((statusEnum.equals(StatusEnum.IN_PROGRESS) &&toDoEntity.getStatus().equals(StatusEnum.OPEN)) ||
+                (statusEnum.equals(StatusEnum.CLOSED) &&toDoEntity.getStatus().equals(StatusEnum.IN_PROGRESS))){
+            emailSenderService.sendEmail(userRepository.findByToDoEntities(toDoEntity).getEmail(),
+                    "Todo's status changed",
+                    "Your's ToDo '" + toDoEntity.getTitle() + "' status has been changed from " + toDoEntity.getStatus().name() + " to " + statusEnum.name());
+        }
         toDoEntity.setStatus(statusEnum);
         return toDoRepository.save(toDoEntity);
     }

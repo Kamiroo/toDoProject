@@ -72,7 +72,7 @@ public class CommentControllerTest {
 
         String url = "http://localhost:" + port + "/addComment";
 
-        ResponseEntity<String> result = this.testRestTemplate.postForEntity(url, comment, String.class);
+        ResponseEntity<String> result = this.testRestTemplate.withBasicAuth("admin", "admin1").postForEntity(url, comment, String.class);
 
         assertThat(result.getStatusCodeValue()).isEqualTo(200);
     }
